@@ -1,6 +1,7 @@
 const db = require("../../db/connection.js");
 const format = require("pg-format");
 
+
 function selectTopics(){
   const sql = `SELECT * FROM topics`
 
@@ -9,4 +10,6 @@ function selectTopics(){
   })
 }
 
-module.exports = { selectTopics}
+
+
+module.exports = { selectTopics }
