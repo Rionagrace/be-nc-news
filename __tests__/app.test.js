@@ -54,4 +54,20 @@ describe("/api/articles/:article_id", () => {
 				);
 			});
 	});
+  test("returns 400 when request has incorrect format(nan)", () => {
+    return request(app)
+    .get("/api/articles/hello")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe("Bad request")
+    })
+  })
+  test("returns 404 when valid but non-existant id requested", () => {
+    return request(app)
+    .get("/api/articles/34567")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("Article not found")
+    })
+  })
 });
