@@ -13,7 +13,6 @@ function getEndPoints(req, res, next) {
 	return res
 		.status(200)
 		.send({ endPoints })
-		.catch((err) => next(err));
 }
 
 module.exports = { getTopics, getEndPoints };
