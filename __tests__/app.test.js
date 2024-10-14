@@ -54,42 +54,77 @@ describe("/api/articles/:article_id", () => {
 				);
 			});
 	});
-  test("returns 400 when request has incorrect format(nan)", () => {
-    return request(app)
-    .get("/api/articles/hello")
-    .expect(400)
-    .then(({body}) => {
-      expect(body.msg).toBe("Bad request")
-    })
-  })
-  test("returns 404 when valid but non-existant id requested", () => {
-    return request(app)
-    .get("/api/articles/34567")
-    .expect(404)
-    .then(({body}) => {
-      expect(body.msg).toBe("Article not found")
-    })
-  })
+	test("returns 400 when request has incorrect format(nan)", () => {
+		return request(app)
+			.get("/api/articles/hello")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad request");
+			});
+	});
+	test("returns 404 when valid but non-existant id requested", () => {
+		return request(app)
+			.get("/api/articles/34567")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Article not found");
+			});
+	});
 });
 
 describe("/api/articles", () => {
-  test("returns 200 and an array of all articles, descending by created_by", () => {
-    return request(app)
-    .get("/api/articles")
-    .expect(200)
-    .then(({body}) => {
-      console.log(body.articles)
-      expect(body.articles).toBeSortedBy("created_at",{descending: true})
-      body.articles.forEach((article) => {
-        expect(typeof article.author).toBe("string")
-        expect(typeof article.title).toBe("string")
-        expect(typeof article.article_id).toBe("number")
-        expect(typeof article.topic).toBe("string")
-        expect(typeof article.created_at).toBe("string")
-        expect(typeof article.votes).toBe("number")
-        expect(typeof article.article_img_url).toBe("string")
-        expect(typeof article.comment_count).toBe("string")
-      })
-    })
-  })
-})
+	test("returns 200 and an array of all articles, descending by created_by", () => {
+		return request(app)
+			.get("/api/articles")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("created_at", { descending: true });
+				body.articles.forEach((article) => {
+					expect(typeof article.author).toBe("string");
+					expect(typeof article.title).toBe("string");
+					expect(typeof article.article_id).toBe("number");
+					expect(typeof article.topic).toBe("string");
+					expect(typeof article.created_at).toBe("string");
+					expect(typeof article.votes).toBe("number");
+					expect(typeof article.article_img_url).toBe("string");
+					expect(typeof article.comment_count).toBe("string");
+				});
+			});
+	});
+});
+
+describe("/api/articles/:article_id/comments", () => {
+	test("returns 200 and all relevent comments", () => {
+		return request(app)
+			.get("/api/articles/1/comments")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.comments.length).toBe(11);
+				expect(body.comments).toBeSortedBy("created_at", { descending: true });
+				body.comments.forEach((comment) => {
+					expect(typeof comment.comment_id).toBe("number");
+					expect(typeof comment.votes).toBe("number");
+					expect(typeof comment.created_at).toBe("string");
+					expect(typeof comment.author).toBe("string");
+					expect(typeof comment.body).toBe("string");
+					expect(comment.article_id).toBe(1);
+				});
+			});
+	});
+	test("returns 400 and bad request when invalid id type requested", () => {
+		return request(app)
+			.get("/api/articles/hello/comments")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad request");
+			});
+	});
+	test("returns 404 and author id does not exist when non-existant author id requested", () => {
+		return request(app)
+			.get("/api/articles/600000000/comments")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Author id does not exist");
+			});
+	});
+});

@@ -24,9 +24,7 @@ function selectArticleById(article_id) {
 }
 
 function selectArticles() {
-	return db
-		.query(
-			`SELECT 
+	const sql = `SELECT 
     articles.author, 
     articles.title, 
     articles.article_id, 
@@ -50,10 +48,33 @@ GROUP BY
     articles.votes, 
     articles.article_img_url
 ORDER BY 
-    articles.created_at DESC;`
-		)
-		.then((result) => {
-			return result.rows;
-		});
+    articles.created_at DESC;`;
+
+	return db.query(sql).then((result) => {
+		return result.rows;
+	});
 }
-module.exports = { selectTopics, selectArticleById, selectArticles };
+
+function selectCommentsById(article_id) {
+	const sql = `
+  SELECT * 
+  FROM comments 
+  WHERE article_id = $1 
+  ORDER BY comments.created_at DESC;`;
+
+	return db.query(sql, [article_id]).then((result) => {
+		if (!result.rows.length) {
+			return Promise.reject({
+				status: 404,
+				msg: `Author id does not exist`,
+			});
+		}
+		return result.rows;
+	});
+}
+module.exports = {
+	selectTopics,
+	selectArticleById,
+	selectArticles,
+	selectCommentsById,
+};
