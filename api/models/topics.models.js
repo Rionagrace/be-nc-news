@@ -23,9 +23,37 @@ function selectArticleById(article_id) {
 		});
 }
 
-function selectArticles(){
-  return db.query(`SELECT author, title, article_id, topic, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC;`).then((result) => {
-    return result.rows
-  })
+function selectArticles() {
+	return db
+		.query(
+			`SELECT 
+    articles.author, 
+    articles.title, 
+    articles.article_id, 
+    articles.topic, 
+    articles.created_at, 
+    articles.votes, 
+    articles.article_img_url, 
+    COUNT(comments.article_id) AS comment_count
+FROM 
+    articles
+INNER JOIN 
+    comments 
+ON 
+    articles.article_id = comments.article_id
+GROUP BY 
+    articles.author, 
+    articles.title, 
+    articles.article_id, 
+    articles.topic, 
+    articles.created_at, 
+    articles.votes, 
+    articles.article_img_url
+ORDER BY 
+    articles.created_at DESC;`
+		)
+		.then((result) => {
+			return result.rows;
+		});
 }
-module.exports = { selectTopics, selectArticleById, selectArticles};
+module.exports = { selectTopics, selectArticleById, selectArticles };
