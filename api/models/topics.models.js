@@ -9,6 +9,18 @@ function selectTopics() {
 	});
 }
 
+function checkTopicExists(topic) {
+	const sql = format(`SELECT * FROM topics WHERE slug = %L`, topic);
+
+	return db.query(sql).then((result) => {
+		return result.rows;
+	});
+}
+
+
+
+
+
 module.exports = {
-	selectTopics,
+	selectTopics, checkTopicExists
 };

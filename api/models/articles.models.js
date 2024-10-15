@@ -1,5 +1,6 @@
 const db = require("../../db/connection.js");
 const format = require("pg-format");
+const { selectTopics, checkTopicExists } = require("./topics.models.js");
 
 function selectArticleById(article_id) {
 	return db
@@ -67,28 +68,42 @@ FROM
 LEFT JOIN 
     comments 
 ON 
-    articles.article_id = comments.article_id`
+    articles.article_id = comments.article_id`;
 
-		const filterByTopic = format(` WHERE topic = %L`, topic)
+	const filterByTopic = format(` WHERE topic = %L`, topic);
 
-		const orderBy = format(` ORDER BY 
-    %s %s;`, sort_by, order);
+	const orderBy = format(
+		` ORDER BY 
+    %s %s;`,
+		sort_by,
+		order
+	);
 
-		const groupBy = ` GROUP BY 
+	const groupBy = ` GROUP BY 
     articles.article_id`;
 
-		const fullSql = sql + (topic ? filterByTopic : "") + groupBy + orderBy
+	const fullSql = sql + (topic ? filterByTopic : "") + groupBy + orderBy;
 
-	return db.query(fullSql).then((result) => {
-		if(!result.rows.length){
-			return Promise.reject({
-				status: 404,
-				msg: "articles not found"
+	if (topic) {
+		return checkTopicExists(topic)
+			.then((result) => {
+				console.log(result)
+				if (!result.length) {
+					return Promise.reject({
+						status: 404,
+						msg: "topic not found",
+					});
+				}
+				return db.query(fullSql);
 			})
-		}
-
-		return result.rows;
-	});
+			.then((result) => {
+				return result.rows;
+			});
+	}
+	return db.query(fullSql)
+	.then((result)=> {
+		return result.rows
+	})
 }
 
 module.exports = { selectArticleById, selectArticles, editArticleByID };
