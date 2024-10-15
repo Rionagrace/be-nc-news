@@ -103,7 +103,7 @@ describe("/api/articles/:article_id", () => {
 					expect(body.msg).toBe("Article not found");
 				});
 		});
-    test("returns 400 when invalid id requested", () => {
+		test("returns 400 when invalid id requested", () => {
 			return request(app)
 				.patch("/api/articles/hello")
 				.send({ inc_votes: 1 })
@@ -112,24 +112,24 @@ describe("/api/articles/:article_id", () => {
 					expect(body.msg).toBe("Bad request");
 				});
 		});
-    test("returns 400 when wrong data type sent", () => {
-      return request(app)
+		test("returns 400 when wrong data type sent", () => {
+			return request(app)
 				.patch("/api/articles/1")
 				.send({ inc_votes: "hi" })
 				.expect(400)
 				.then(({ body }) => {
 					expect(body.msg).toBe("Bad request");
 				});
-    })
-    test("returns 401 when incorrect data key sent", () => {
-      return request(app)
+		});
+		test("returns 401 when incorrect data key sent", () => {
+			return request(app)
 				.patch("/api/articles/1")
 				.send({ wrong: 2 })
 				.expect(401)
 				.then(({ body }) => {
 					expect(body.msg).toBe("no votes to patch");
 				});
-    })
+		});
 	});
 });
 
@@ -261,6 +261,30 @@ describe("/api/articles/:article_id/comments", () => {
 				.expect(401)
 				.then(({ body }) => {
 					expect(body.msg).toBe("invalid user");
+				});
+		});
+	});
+});
+
+describe("/api/comments/:comment_id", () => {
+	describe("DELETE", () => {
+		test("204 and deletes comment", () => {
+			return request(app).delete("/api/comments/1").expect(204);
+		});
+		test("404 comment not found for valid but nonexistant id", () => {
+			return request(app)
+				.delete("/api/comments/10000")
+				.expect(404)
+				.then(({ body }) => {
+					expect(body.msg).toBe("comment does not exist");
+				});
+		});
+		test("400 bad request for invalid id", () => {
+			return request(app)
+				.delete("/api/comments/hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
 				});
 		});
 	});
