@@ -87,7 +87,6 @@ ON
 	if (topic) {
 		return checkTopicExists(topic)
 			.then((result) => {
-				console.log(result)
 				if (!result.length) {
 					return Promise.reject({
 						status: 404,
