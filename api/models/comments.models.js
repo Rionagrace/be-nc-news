@@ -1,5 +1,7 @@
 const db = require("../../db/connection.js");
 const format = require("pg-format");
+const { selectArticleById } = require("./articles.models.js");
+const { articleData } = require("../../db/data/test-data/index.js");
 
 function selectCommentsById(article_id) {
 	const sql = `
@@ -26,25 +28,17 @@ function insertCommentById(article_id, comment) {
 			msg: "missing either username or body",
 		});
 	}
-	return db
-		.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
-		.then((result) => {
-			const article_id = result.rows[0]?.article_id;
-			if (!article_id) {
-				return Promise.reject({
-					status: 404,
-					msg: "article not found",
-				});
-			}
-			return db
+	return selectArticleById(article_id).then(() => {
+		return db
 				.query(
 					`INSERT INTO comments (author, body, article_id) VALUES ($1, $2, $3) RETURNING *;`,
 					[comment.username, comment.body, article_id]
 				)
+	})
 				.then((result) => {
 					return result.rows[0];
 				});
-		});
-}
+		};
+
 
 module.exports = { selectCommentsById, insertCommentById };
