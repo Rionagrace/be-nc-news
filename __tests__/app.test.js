@@ -231,6 +231,27 @@ describe("/api/articles", () => {
         });
     });
 	});
+  describe("FILTER QUERIES", () => {
+    test("returns 200 and articles filtered by topic", () => {
+      return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({body}) => {
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("mitch")
+        })
+      })
+    })
+    test("404 bad articles not found if topic has no articles", () => {
+      return request(app)
+      .get("/api/articles?topic=rio")
+      .expect(404)
+      .then(({body}) => {
+        console.log(body)
+        expect(body.msg).toBe("articles not found")
+      })
+    })
+  })
 });
 
 describe("/api/articles/:article_id/comments", () => {

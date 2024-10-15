@@ -16,15 +16,13 @@ function selectArticleById(article_id) {
 }
 
 function editArticleByID(article_id, body) {
-
-	if(!body.inc_votes){
+	if (!body.inc_votes) {
 		return Promise.reject({
 			status: 401,
 			msg: "no votes to patch",
 		});
 	}
-	
-	
+
 	return selectArticleById(article_id)
 		.then(() => {
 			return db.query(
@@ -37,19 +35,25 @@ function editArticleByID(article_id, body) {
 		});
 }
 
-function selectArticles(sort_by = "created_at", order = "desc") {
+function selectArticles(sort_by = "created_at", order = "desc", topic) {
 	const allowed = {
-		sort_by: ["author", "title", "article_id", "topic", "created_at", "votes", "comment_count"],
+		sort_by: [
+			"author",
+			"title",
+			"article_id",
+			"topic",
+			"created_at",
+			"votes",
+			"comment_count",
+		],
 		order: ["asc", "ASC", "desc", "DESC"],
 	};
 
 	if (!allowed.sort_by.includes(sort_by) || !allowed.order.includes(order)) {
-		return Promise.reject({ status: 400,
-			msg: "bad request"
-		});
+		return Promise.reject({ status: 400, msg: "bad request" });
 	}
 
-	const sql = format(`SELECT 
+	const sql = `SELECT 
     articles.author, 
     articles.title, 
     articles.article_id, 
@@ -63,13 +67,26 @@ FROM
 LEFT JOIN 
     comments 
 ON 
-    articles.article_id = comments.article_id
-GROUP BY 
-    articles.article_id 
-ORDER BY 
+    articles.article_id = comments.article_id`
+
+		const filterByTopic = format(` WHERE topic = %L`, topic)
+
+		const orderBy = format(` ORDER BY 
     %s %s;`, sort_by, order);
 
-	return db.query(sql).then((result) => {
+		const groupBy = ` GROUP BY 
+    articles.article_id`;
+
+		const fullSql = sql + (topic ? filterByTopic : "") + groupBy + orderBy
+
+	return db.query(fullSql).then((result) => {
+		if(!result.rows.length){
+			return Promise.reject({
+				status: 404,
+				msg: "articles not found"
+			})
+		}
+
 		return result.rows;
 	});
 }
