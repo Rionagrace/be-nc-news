@@ -15,6 +15,28 @@ function selectArticleById(article_id) {
 		});
 }
 
+function editArticleByID(article_id, body) {
+
+	if(!body.inc_votes){
+		return Promise.reject({
+			status: 401,
+			msg: "no votes to patch",
+		});
+	}
+	
+	
+	return selectArticleById(article_id)
+		.then(() => {
+			return db.query(
+				`UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`,
+				[body.inc_votes, article_id]
+			);
+		})
+		.then((result) => {
+			return result.rows[0];
+		});
+}
+
 function selectArticles() {
 	const sql = `SELECT 
     articles.author, 
@@ -41,4 +63,4 @@ ORDER BY
 	});
 }
 
-module.exports = { selectArticleById, selectArticles };
+module.exports = { selectArticleById, selectArticles, editArticleByID };

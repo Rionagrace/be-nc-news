@@ -38,37 +38,98 @@ describe("/api", () => {
 });
 
 describe("/api/articles/:article_id", () => {
-	test("returns 200 and the specified article", () => {
-		return request(app)
-			.get("/api/articles/1")
-			.expect(200)
-			.then(({ body }) => {
-				expect(body.article.title).toBe("Living in the shadow of a great man");
-				expect(body.article.topic).toBe("mitch");
-				expect(body.article.body).toBe("I find this existence challenging");
-				expect(body.article.article_id).toBe(1);
-				expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
-				expect(body.article.votes).toBe(100);
-				expect(body.article.article_img_url).toBe(
-					"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-				);
-			});
+	describe("GET", () => {
+		test("returns 200 and the specified article", () => {
+			return request(app)
+				.get("/api/articles/1")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.article.title).toBe(
+						"Living in the shadow of a great man"
+					);
+					expect(body.article.topic).toBe("mitch");
+					expect(body.article.body).toBe("I find this existence challenging");
+					expect(body.article.article_id).toBe(1);
+					expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
+					expect(body.article.votes).toBe(100);
+					expect(body.article.article_img_url).toBe(
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+					);
+				});
+		});
+		test("returns 400 when request has incorrect format", () => {
+			return request(app)
+				.get("/api/articles/hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+		});
+		test("returns 404 when valid but non-existant id requested", () => {
+			return request(app)
+				.get("/api/articles/34567")
+				.expect(404)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Article not found");
+				});
+		});
 	});
-	test("returns 400 when request has incorrect format", () => {
-		return request(app)
-			.get("/api/articles/hello")
-			.expect(400)
-			.then(({ body }) => {
-				expect(body.msg).toBe("Bad request");
-			});
-	});
-	test("returns 404 when valid but non-existant id requested", () => {
-		return request(app)
-			.get("/api/articles/34567")
-			.expect(404)
-			.then(({ body }) => {
-				expect(body.msg).toBe("Article not found");
-			});
+	describe("PATCH", () => {
+		test("200 and returns with updated article", () => {
+			return request(app)
+				.patch("/api/articles/1")
+				.send({ inc_votes: 1 })
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.article.title).toBe(
+						"Living in the shadow of a great man"
+					);
+					expect(body.article.topic).toBe("mitch");
+					expect(body.article.body).toBe("I find this existence challenging");
+					expect(body.article.article_id).toBe(1);
+					expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
+					expect(body.article.article_img_url).toBe(
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+					);
+					expect(body.article.votes).toBe(101);
+				});
+		});
+		test("returns 404 when valid but non-existant id requested", () => {
+			return request(app)
+				.patch("/api/articles/34567")
+				.send({ inc_votes: 1 })
+				.expect(404)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Article not found");
+				});
+		});
+    test("returns 400 when invalid id requested", () => {
+			return request(app)
+				.patch("/api/articles/hello")
+				.send({ inc_votes: 1 })
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+		});
+    test("returns 400 when wrong data type sent", () => {
+      return request(app)
+				.patch("/api/articles/1")
+				.send({ inc_votes: "hi" })
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+    })
+    test("returns 401 when incorrect data key sent", () => {
+      return request(app)
+				.patch("/api/articles/1")
+				.send({ wrong: 2 })
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("no votes to patch");
+				});
+    })
 	});
 });
 
@@ -189,19 +250,18 @@ describe("/api/articles/:article_id/comments", () => {
 					expect(body.msg).toBe("Article not found");
 				});
 		});
-    test("responds 401 username invalid", () => {
-      const comment = {
+		test("responds 401 username invalid", () => {
+			const comment = {
 				username: "rio",
 				body: "loved this",
 			};
-      return request(app)
-      .post("/api/articles/1/comments")
-      .send(comment)
-      .expect(401)
-      .then(({body}) => {
-        expect(body.msg).toBe("invalid user")
-      })
-      })
-    })
+			return request(app)
+				.post("/api/articles/1/comments")
+				.send(comment)
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("invalid user");
+				});
+		});
 	});
-
+});
