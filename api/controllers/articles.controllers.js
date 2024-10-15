@@ -24,8 +24,8 @@ function updateArticleById(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-	const { sort_by, order } = req.query;
-	return selectArticles(sort_by, order)
+	const { sort_by, order, topic } = req.query;
+	return selectArticles(sort_by, order, topic)
 		.then((articles) => {
 			res.status(200).send({ articles });
 		})
