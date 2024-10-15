@@ -44,4 +44,33 @@ function insertCommentById(article_id, comment) {
 		});
 }
 
-module.exports = { selectCommentsById, insertCommentById };
+function removeCommentById(comment_id) {
+	return selectCommentByCommentId(comment_id)
+		.then(() => {
+			return db.query(`DELETE FROM comments WHERE comment_id = $1`, [
+				comment_id,
+			]);
+		})
+		.then((result) => {
+			return result.rows;
+		});
+}
+
+function selectCommentByCommentId(comment_id) {
+	const sql = `
+  SELECT * 
+  FROM comments 
+  WHERE comment_id = $1;`;
+
+	return db.query(sql, [comment_id]).then((result) => {
+		if (!result.rows.length) {
+			return Promise.reject({
+				status: 404,
+				msg: `comment does not exist`,
+			});
+		}
+		return result.rows;
+	});
+}
+
+module.exports = { selectCommentsById, insertCommentById, removeCommentById };
