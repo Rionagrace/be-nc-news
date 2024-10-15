@@ -242,13 +242,20 @@ describe("/api/articles", () => {
         })
       })
     })
-    test("404 bad articles not found if topic has no articles", () => {
+    test("404 topic not found if topic does not exist", () => {
       return request(app)
       .get("/api/articles?topic=rio")
       .expect(404)
       .then(({body}) => {
-        console.log(body)
-        expect(body.msg).toBe("articles not found")
+        expect(body.msg).toBe("topic not found")
+      })
+    })
+    test("200 empty array if topic exists but no articles", () => {
+      return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles.length).toBe(0)
       })
     })
   })
