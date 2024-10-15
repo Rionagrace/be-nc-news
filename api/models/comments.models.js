@@ -2,6 +2,7 @@ const db = require("../../db/connection.js");
 const format = require("pg-format");
 const { selectArticleById } = require("./articles.models.js");
 const { articleData } = require("../../db/data/test-data/index.js");
+const { validateUsername } = require("./usernames.models.js");
 
 function selectCommentsById(article_id) {
 	const sql = `
@@ -24,21 +25,23 @@ function selectCommentsById(article_id) {
 function insertCommentById(article_id, comment) {
 	if (!comment.username || !comment.body) {
 		return Promise.reject({
-			status: 400,
+			status: 401,
 			msg: "missing either username or body",
 		});
 	}
-	return selectArticleById(article_id).then(() => {
-		return db
-				.query(
-					`INSERT INTO comments (author, body, article_id) VALUES ($1, $2, $3) RETURNING *;`,
-					[comment.username, comment.body, article_id]
-				)
-	})
-				.then((result) => {
-					return result.rows[0];
-				});
-		};
-
+	return validateUsername(comment.username)
+		.then(() => {
+			return selectArticleById(article_id);
+		})
+		.then(() => {
+			return db.query(
+				`INSERT INTO comments (author, body, article_id) VALUES ($1, $2, $3) RETURNING *;`,
+				[comment.username, comment.body, article_id]
+			);
+		})
+		.then((result) => {
+			return result.rows[0];
+		});
+}
 
 module.exports = { selectCommentsById, insertCommentById };
