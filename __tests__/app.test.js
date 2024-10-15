@@ -53,8 +53,9 @@ describe("/api/articles/:article_id", () => {
 					expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
 					expect(body.article.votes).toBe(100);
 					expect(body.article.article_img_url).toBe(
-						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-					);
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700")
+            expect(body.article.comment_count).toBe("11")
+					
 				});
 		});
 		test("returns 400 when request has incorrect format", () => {
