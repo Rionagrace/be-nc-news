@@ -37,8 +37,19 @@ function editArticleByID(article_id, body) {
 		});
 }
 
-function selectArticles() {
-	const sql = `SELECT 
+function selectArticles(sort_by = "created_at", order = "desc") {
+	const allowed = {
+		sort_by: ["author", "title", "article_id", "topic", "created_at", "votes", "comment_count"],
+		order: ["asc", "ASC", "desc", "DESC"],
+	};
+
+	if (!allowed.sort_by.includes(sort_by) || !allowed.order.includes(order)) {
+		return Promise.reject({ status: 400,
+			msg: "bad request"
+		});
+	}
+
+	const sql = format(`SELECT 
     articles.author, 
     articles.title, 
     articles.article_id, 
@@ -56,7 +67,7 @@ ON
 GROUP BY 
     articles.article_id 
 ORDER BY 
-    articles.created_at DESC;`;
+    %s %s;`, sort_by, order);
 
 	return db.query(sql).then((result) => {
 		return result.rows;
