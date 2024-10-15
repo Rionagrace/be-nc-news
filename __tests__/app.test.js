@@ -132,25 +132,62 @@ describe("/api/articles/:article_id/comments", () => {
 				});
 		});
 	});
-  describe("POST", () => {
-    test("responds 201 and posts new comment", () => {
-      const comment = {
-        username: "rogersop",
-        body: "loved this"
-      }
-      return request(app)
-      .post("/api/articles/1/comments")
-      .send(comment)
-      .expect(201)
-      .then(({body}) => {
-        
-        expect(body.comment.comment_id).toBe(19)
-        expect(body.comment.body).toBe("loved this")
-        expect(body.comment.article_id).toBe(1)
-        expect(body.comment.author).toBe("rogersop")
-        expect(body.comment.votes).toBe(0)
-        expect(typeof body.comment.created_at).toBe("string")
-      })
-    })
-  })
+	describe("POST", () => {
+		test("responds 201 and posts new comment", () => {
+			const comment = {
+				username: "rogersop",
+				body: "loved this",
+			};
+			return request(app)
+				.post("/api/articles/1/comments")
+				.send(comment)
+				.expect(201)
+				.then(({ body }) => {
+					expect(body.comment.comment_id).toBe(19);
+					expect(body.comment.body).toBe("loved this");
+					expect(body.comment.article_id).toBe(1);
+					expect(body.comment.author).toBe("rogersop");
+					expect(body.comment.votes).toBe(0);
+					expect(typeof body.comment.created_at).toBe("string");
+				});
+		});
+		test("responds 400 missing username or body", () => {
+			const comment = {
+				wrong: "nope",
+			};
+			return request(app)
+				.post("/api/articles/1/comments")
+				.send(comment)
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("missing either username or body");
+				});
+		});
+		test("responds 400 bad request when article_id invalid", () => {
+			const comment = {
+				username: "rogersop",
+				body: "loved this",
+			};
+			return request(app)
+				.post("/api/articles/hello/comments")
+				.send(comment)
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+		});
+		test("responds 404 article not found when article_id nonexistant", () => {
+			const comment = {
+				username: "rogersop",
+				body: "loved this",
+			};
+			return request(app)
+				.post("/api/articles/50000/comments")
+				.send(comment)
+				.expect(404)
+				.then(({ body }) => {
+					expect(body.msg).toBe("article not found");
+				});
+		});
+	});
 });
