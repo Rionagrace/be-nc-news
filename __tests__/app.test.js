@@ -151,14 +151,14 @@ describe("/api/articles/:article_id/comments", () => {
 					expect(typeof body.comment.created_at).toBe("string");
 				});
 		});
-		test("responds 400 missing username or body", () => {
+		test("responds 401 missing username or body", () => {
 			const comment = {
 				wrong: "nope",
 			};
 			return request(app)
 				.post("/api/articles/1/comments")
 				.send(comment)
-				.expect(400)
+				.expect(401)
 				.then(({ body }) => {
 					expect(body.msg).toBe("missing either username or body");
 				});
@@ -189,5 +189,19 @@ describe("/api/articles/:article_id/comments", () => {
 					expect(body.msg).toBe("Article not found");
 				});
 		});
+    test("responds 401 username invalid", () => {
+      const comment = {
+				username: "rio",
+				body: "loved this",
+			};
+      return request(app)
+      .post("/api/articles/1/comments")
+      .send(comment)
+      .expect(401)
+      .then(({body}) => {
+        expect(body.msg).toBe("invalid user")
+      })
+      })
+    })
 	});
-});
+
