@@ -51,5 +51,17 @@
 			"votes": 0,
 			"created_at": "2020-01-01T03:08:00.000Z"
 		}
+	},
+	"POST /api/articles/:article_id/comments": {
+		"description": "Posts a comment to a specified article id and returns that new comment",
+		"queries": [],
+		"exampleResponse": {
+      "comment_id": 19,
+      "body": "loved this",
+      "article_id": 1,
+      "author": "rogersop",
+      "votes": 0,
+      "created_at": "2024-10-15T08:09:05.386Z"
+    }
 	}
 }

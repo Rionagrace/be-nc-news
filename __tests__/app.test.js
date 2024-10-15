@@ -143,6 +143,7 @@ describe("/api/articles/:article_id/comments", () => {
 				.send(comment)
 				.expect(201)
 				.then(({ body }) => {
+          console.log(body.comment)
 					expect(body.comment.comment_id).toBe(19);
 					expect(body.comment.body).toBe("loved this");
 					expect(body.comment.article_id).toBe(1);
