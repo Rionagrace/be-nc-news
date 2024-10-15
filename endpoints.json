@@ -78,5 +78,10 @@
       "votes": 0,
       "created_at": "2024-10-15T08:09:05.386Z"
     }
+	},
+	"DLEETE /api/comments/:comment_id": {
+		"description": "deletes specified comment",
+		"queries": [],
+		"exampleResponse": {}
 	}
 }
