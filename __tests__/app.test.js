@@ -134,25 +134,102 @@ describe("/api/articles/:article_id", () => {
 });
 
 describe("/api/articles", () => {
-	test("returns 200 and an array of all articles, descending by created_by", () => {
-		return request(app)
-			.get("/api/articles")
-			.expect(200)
-			.then(({ body }) => {
-        console.log(body)
-				expect(body.articles.length).not.toBe(0);
-				expect(body.articles).toBeSortedBy("created_at", { descending: true });
-				body.articles.forEach((article) => {
-					expect(typeof article.author).toBe("string");
-					expect(typeof article.title).toBe("string");
-					expect(typeof article.article_id).toBe("number");
-					expect(typeof article.topic).toBe("string");
-					expect(typeof article.created_at).toBe("string");
-					expect(typeof article.votes).toBe("number");
-					expect(typeof article.article_img_url).toBe("string");
-					expect(typeof article.comment_count).toBe("string");
+	describe("GET", () => {
+		test("returns 200 and an array of all articles, descending by created_by", () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles.length).not.toBe(0);
+					expect(body.articles).toBeSortedBy("created_at", {
+						descending: true,
+					});
+					body.articles.forEach((article) => {
+						expect(typeof article.author).toBe("string");
+						expect(typeof article.title).toBe("string");
+						expect(typeof article.article_id).toBe("number");
+						expect(typeof article.topic).toBe("string");
+						expect(typeof article.created_at).toBe("string");
+						expect(typeof article.votes).toBe("number");
+						expect(typeof article.article_img_url).toBe("string");
+						expect(typeof article.comment_count).toBe("string");
+					});
 				});
-			});
+		});
+	});
+	describe("SORTING QUERIES", () => {
+		test("200 - default sorts descending by created_by", () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles).toBeSortedBy("created_at", {
+						descending: true,
+					});
+				});
+		});
+		test("200 - sorted_by=author returns articles sorted by author, desc default", () => {
+			return request(app)
+				.get("/api/articles?sort_by=author")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles).toBeSortedBy("author", {
+						descending: true,
+					});
+				});
+		});
+		test("200 - order=ASC returns articles sorted ascending, created_at default", () => {
+			return request(app)
+				.get("/api/articles?order=asc")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles).toBeSortedBy("created_at", {
+						ascending: true,
+					});
+				});
+		});
+		test("200 - you can stack sorting and ordering queries", () => {
+			return request(app)
+				.get("/api/articles?sort_by=topic&order=asc")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles).toBeSortedBy("topic", {
+						ascending: true,
+					});
+				});
+		});
+    test("Responds with 400 and bad request for invalid order value", () => {
+      return request(app)
+        .get("/api/articles?order=helloworld")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("bad request");
+        });
+    });
+    test("Responds with 400 and bad request for invalid sort_by value", () => {
+      return request(app)
+        .get("/api/articles?sort_by=helloworld")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("bad request");
+        });
+    });
+    test("Responds with 400 and bad request when invalid sort_by value and valid order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=helloworld&order=asc")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("bad request");
+        });
+    });
+    test("Responds with 400 and bad request when invalid order value and valid sort_by", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author&order=hello")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("bad request");
+        });
+    });
 	});
 });
 
@@ -292,18 +369,18 @@ describe("/api/comments/:comment_id", () => {
 });
 
 describe("/api/users", () => {
-  describe("GET", () => {
-    test("200 and all users", () => {
-      return request(app)
-      .get("/api/users")
-      .expect(200)
-      .then(({body}) => {
-        body.users.forEach((user) => {
-          expect(typeof user.username).toBe("string")
-          expect(typeof user.name).toBe("string")
-          expect(typeof user.avatar_url).toBe("string")
-        })
-      })
-    })
-  })
-})
+	describe("GET", () => {
+		test("200 and all users", () => {
+			return request(app)
+				.get("/api/users")
+				.expect(200)
+				.then(({ body }) => {
+					body.users.forEach((user) => {
+						expect(typeof user.username).toBe("string");
+						expect(typeof user.name).toBe("string");
+						expect(typeof user.avatar_url).toBe("string");
+					});
+				});
+		});
+	});
+});
