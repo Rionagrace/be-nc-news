@@ -1,9 +1,17 @@
 const db = require("../../db/connection.js");
 const format = require("pg-format");
 
-function validateUsername(username) {
+function selectUsers(username) {
+
+	let sql = `SELECT * FROM users;`
+
+
+
+	if(username){
+		sql = format(`SELECT * FROM users WHERE username = %L;`, [username])
+	}
 	return db
-		.query(format(`SELECT * FROM users WHERE username = %L;`, [username]))
+		.query(sql)
 		.then((result) => {
 			if (!result.rows.length) {
 				return Promise.reject({
@@ -11,8 +19,8 @@ function validateUsername(username) {
 					msg: `invalid user`,
 				});
 			}
-			return result.rows[0];
+			return result.rows;
 		});
 }
 
-module.exports = {validateUsername}
+module.exports = {selectUsers}

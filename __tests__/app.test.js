@@ -139,6 +139,7 @@ describe("/api/articles", () => {
 			.get("/api/articles")
 			.expect(200)
 			.then(({ body }) => {
+        console.log(body)
 				expect(body.articles.length).not.toBe(0);
 				expect(body.articles).toBeSortedBy("created_at", { descending: true });
 				body.articles.forEach((article) => {
@@ -289,3 +290,20 @@ describe("/api/comments/:comment_id", () => {
 		});
 	});
 });
+
+describe("/api/users", () => {
+  describe("GET", () => {
+    test("200 and all users", () => {
+      return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({body}) => {
+        body.users.forEach((user) => {
+          expect(typeof user.username).toBe("string")
+          expect(typeof user.name).toBe("string")
+          expect(typeof user.avatar_url).toBe("string")
+        })
+      })
+    })
+  })
+})
