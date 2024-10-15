@@ -2,7 +2,7 @@ const db = require("../../db/connection.js");
 const format = require("pg-format");
 const { selectArticleById } = require("./articles.models.js");
 const { articleData } = require("../../db/data/test-data/index.js");
-const { validateUsername } = require("./usernames.models.js");
+const { selectUsers } = require("./users.models.js");
 
 function selectCommentsById(article_id) {
 	const sql = `
@@ -29,7 +29,7 @@ function insertCommentById(article_id, comment) {
 			msg: "missing either username or body",
 		});
 	}
-	return validateUsername(comment.username)
+	return selectUsers(comment.username)
 		.then(() => {
 			return selectArticleById(article_id);
 		})
@@ -73,4 +73,5 @@ function selectCommentByCommentId(comment_id) {
 	});
 }
 
-module.exports = { selectCommentsById, insertCommentById, removeCommentById };
+
+module.exports = { selectCommentsById, insertCommentById, removeCommentById,  };
