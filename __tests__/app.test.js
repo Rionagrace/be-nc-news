@@ -413,3 +413,26 @@ describe("/api/users", () => {
 		});
 	});
 });
+
+describe("/api/users/:usermame", () => {
+	describe("GET", () => {
+		test("200 and correct user", () => {
+			return request(app)
+			.get("/api/users/lurker")
+			.expect(200)
+			.then(({body}) => {
+				expect(body.user.username).toBe("lurker")
+				expect(body.user.name).toBe("do_nothing")
+				expect(body.user.avatar_url).toBe("https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png")
+			})
+		})
+		test("401 invalid user", () => {
+			return request(app)
+			.get("/api/users/rio")
+			.expect(401)
+			.then(({body}) => {
+				expect(body.msg).toBe("invalid user")
+			})
+		})
+	})
+})
