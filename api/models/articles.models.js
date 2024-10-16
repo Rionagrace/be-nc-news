@@ -29,7 +29,6 @@ ON
 					msg: `Article not found`,
 				});
 			}
-			console.log(result.rows[0])
 			return result.rows[0];
 		});
 }
