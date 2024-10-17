@@ -57,7 +57,20 @@ function editArticleByID(article_id, body) {
 		});
 }
 
-function selectArticles(sort_by = "created_at", order = "desc", topic) {
+function selectArticles(
+	sort_by = "created_at",
+	order = "desc",
+	topic,
+	limit = 10,
+	page = 1
+) {
+	if (isNaN(limit) || isNaN(page) || limit <= 0 || page <= 0) {
+		return Promise.reject({
+			status: 400,
+			msg: "Invalid limit or page query",
+		});
+	}
+	const offset = (page - 1) * 10;
 	const allowed = {
 		sort_by: [
 			"author",
@@ -83,6 +96,7 @@ function selectArticles(sort_by = "created_at", order = "desc", topic) {
     articles.created_at, 
     articles.votes, 
     articles.article_img_url, 
+		(SELECT COUNT(*) FROM articles) AS article_count,
     COUNT(comments.article_id) AS comment_count
 FROM 
     articles
@@ -93,17 +107,20 @@ ON
 
 	const filterByTopic = format(` WHERE topic = %L`, topic);
 
+	const groupBy = ` GROUP BY 
+    articles.article_id`;
+
 	const orderBy = format(
 		` ORDER BY 
-    %s %s;`,
+    %s %s`,
 		sort_by,
 		order
 	);
 
-	const groupBy = ` GROUP BY 
-    articles.article_id`;
+	const limitBy = format(` LIMIT %s OFFSET %s`, limit, offset);
 
-	const fullSql = sql + (topic ? filterByTopic : "") + groupBy + orderBy;
+	const fullSql =
+		sql + (topic ? filterByTopic : "") + groupBy + orderBy + limitBy;
 
 	if (topic) {
 		return checkTopicExists(topic)
@@ -137,16 +154,10 @@ function insertArticle(body) {
 			return checkTopicExists(body.topic);
 		})
 		.then((output) => {
-			// if (!output.length) {
-			// 	return Promise.reject({
-			// 		status: 401,
-			// 		msg: "invalid topic",
-			// 	});
-			// } else
-				return db.query(
-					`INSERT INTO articles (author, title, body, topic) VALUES ($1, $2, $3, $4) RETURNING *;`,
-					[body.author, body.title, body.body, body.topic]
-				);
+			return db.query(
+				`INSERT INTO articles (author, title, body, topic) VALUES ($1, $2, $3, $4) RETURNING *;`,
+				[body.author, body.title, body.body, body.topic]
+			);
 		})
 		.then((article) => {
 			return selectArticleById(article.rows[0].article_id).then((article) => {

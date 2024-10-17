@@ -260,6 +260,66 @@ describe("/api/articles", () => {
 				});
 		});
 	});
+	describe("ORDER BY QUERIES", () => {
+		test("by default returns the first 10 articles", () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles.length).toBe(10);
+					expect(body.articles[0].created_at).toBe("2020-11-03T09:12:00.000Z");
+				});
+		});
+		test("adds article_count", () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles[0].article_count).toBe("13");
+				});
+		});
+		test("limit queries increase/decrease number of articles returned", () => {
+			return request(app)
+				.get("/api/articles?limit=1")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles.length).toBe(1);
+				});
+		});
+		test("page queries offset articles returned", () => {
+			return request(app)
+				.get("/api/articles?page=2")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles.length).toBe(3);
+				});
+		});
+		test("page queries and limit queries can be stacked", () => {
+			return request(app)
+				.get("/api/articles?limit=1&page=2")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles.length).toBe(1);
+					expect(body.articles[0].created_at).toBe("2020-04-17T01:08:00.000Z");
+				});
+		});
+		test("Responds with 400 and bad request for non numeric limit", () => {
+			return request(app)
+				.get("/api/articles?limit=hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Invalid limit or page query");
+				});
+		});
+		test("Responds with 400 and bad request for non numeric page", () => {
+			return request(app)
+				.get("/api/articles?page=hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Invalid limit or page query");
+				});
+		});
+	});
 	describe("POST", () => {
 		test("201 and posts new article", () => {
 			const article = {
