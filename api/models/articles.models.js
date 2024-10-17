@@ -70,7 +70,7 @@ function selectArticles(
 			msg: "Invalid limit or page query",
 		});
 	}
-	const offset = (page - 1) * 10;
+	const offset = (page - 1) * limit;
 	const allowed = {
 		sort_by: [
 			"author",

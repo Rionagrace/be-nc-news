@@ -288,7 +288,7 @@ describe("/api/articles", () => {
 		});
 		test("page queries offset articles returned", () => {
 			return request(app)
-				.get("/api/articles?page=2")
+				.get("/api/articles?p=2")
 				.expect(200)
 				.then(({ body }) => {
 					expect(body.articles.length).toBe(3);
@@ -296,11 +296,11 @@ describe("/api/articles", () => {
 		});
 		test("page queries and limit queries can be stacked", () => {
 			return request(app)
-				.get("/api/articles?limit=1&page=2")
+				.get("/api/articles?limit=1&p=2")
 				.expect(200)
 				.then(({ body }) => {
 					expect(body.articles.length).toBe(1);
-					expect(body.articles[0].created_at).toBe("2020-04-17T01:08:00.000Z");
+					expect(body.articles[0].created_at).toBe("2020-10-18T01:00:00.000Z");
 				});
 		});
 		test("Responds with 400 and bad request for non numeric limit", () => {
@@ -313,7 +313,7 @@ describe("/api/articles", () => {
 		});
 		test("Responds with 400 and bad request for non numeric page", () => {
 			return request(app)
-				.get("/api/articles?page=hello")
+				.get("/api/articles?p=hello")
 				.expect(400)
 				.then(({ body }) => {
 					expect(body.msg).toBe("Invalid limit or page query");
