@@ -13,14 +13,17 @@ function checkTopicExists(topic) {
 	const sql = format(`SELECT * FROM topics WHERE slug = %L`, topic);
 
 	return db.query(sql).then((result) => {
+		if (!result.rows.length) {
+			return Promise.reject({
+				status: 401,
+				msg: "invalid topic",
+			});
+		}
 		return result.rows;
 	});
 }
 
-
-
-
-
 module.exports = {
-	selectTopics, checkTopicExists
+	selectTopics,
+	checkTopicExists,
 };

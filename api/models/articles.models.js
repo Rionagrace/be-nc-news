@@ -1,10 +1,12 @@
 const db = require("../../db/connection.js");
 const format = require("pg-format");
 const { selectTopics, checkTopicExists } = require("./topics.models.js");
+const { selectUsers } = require("./users.models.js");
 
 function selectArticleById(article_id) {
 	return db
-		.query(`SELECT 
+		.query(
+			`SELECT 
     articles.author, 
     articles.title, 
     articles.article_id, 
@@ -21,7 +23,9 @@ LEFT JOIN
 ON 
     articles.article_id = comments.article_id
 		WHERE articles.article_id = $1 GROUP BY 
-    articles.article_id`, [article_id])
+    articles.article_id`,
+			[article_id]
+		)
 		.then((result) => {
 			if (!result.rows.length) {
 				return Promise.reject({
@@ -116,10 +120,44 @@ ON
 				return result.rows;
 			});
 	}
-	return db.query(fullSql)
-	.then((result)=> {
-		return result.rows
-	})
+	return db.query(fullSql).then((result) => {
+		return result.rows;
+	});
 }
 
-module.exports = { selectArticleById, selectArticles, editArticleByID };
+function insertArticle(body) {
+	if (!body.topic || !body.author || !body.body || !body.title)
+		return Promise.reject({
+			status: 401,
+			msg: "missing one or more elements",
+		});
+
+	return selectUsers(body.author)
+		.then(() => {
+			return checkTopicExists(body.topic);
+		})
+		.then((output) => {
+			// if (!output.length) {
+			// 	return Promise.reject({
+			// 		status: 401,
+			// 		msg: "invalid topic",
+			// 	});
+			// } else
+				return db.query(
+					`INSERT INTO articles (author, title, body, topic) VALUES ($1, $2, $3, $4) RETURNING *;`,
+					[body.author, body.title, body.body, body.topic]
+				);
+		})
+		.then((article) => {
+			return selectArticleById(article.rows[0].article_id).then((article) => {
+				return article;
+			});
+		});
+}
+
+module.exports = {
+	selectArticleById,
+	selectArticles,
+	editArticleByID,
+	insertArticle,
+};

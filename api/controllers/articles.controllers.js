@@ -2,6 +2,7 @@ const {
 	selectArticleById,
 	selectArticles,
 	editArticleByID,
+	insertArticle,
 } = require("../models/articles.models.js");
 
 function getArticleById(req, res, next) {
@@ -17,10 +18,10 @@ function updateArticleById(req, res, next) {
 	const { article_id } = req.params;
 	const { body } = req;
 	return editArticleByID(article_id, body)
-	.then((article) => {
-		res.status(200).send({ article })
-	})
-	.catch((err) => next(err))
+		.then((article) => {
+			res.status(200).send({ article });
+		})
+		.catch((err) => next(err));
 }
 
 function getArticles(req, res, next) {
@@ -32,4 +33,17 @@ function getArticles(req, res, next) {
 		.catch((err) => next(err));
 }
 
-module.exports = { getArticleById, getArticles, updateArticleById };
+function postArticle(req, res, next) {
+	const { body } = req;
+	return insertArticle(body)
+		.then((article) => {
+			res.status(201).send({ article });
+		})
+		.catch((err) => next(err));
+}
+module.exports = {
+	getArticleById,
+	getArticles,
+	updateArticleById,
+	postArticle,
+};

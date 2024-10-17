@@ -2,6 +2,7 @@ const {
 	getArticleById,
 	updateArticleById,
 	getArticles,
+	postArticle,
 } = require("../api/controllers/articles.controllers");
 const { commentsRouter } = require("./comments-routers");
 
@@ -12,7 +13,9 @@ articlesRouter
 	.get(getArticleById)
 	.patch(updateArticleById);
 
-articlesRouter.get("/", getArticles);
+articlesRouter.route("/")
+.get(getArticles)
+.post(postArticle)
 
 articlesRouter.use("/", commentsRouter);
 

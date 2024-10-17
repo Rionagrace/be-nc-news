@@ -53,9 +53,9 @@ describe("/api/articles/:article_id", () => {
 					expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
 					expect(body.article.votes).toBe(100);
 					expect(body.article.article_img_url).toBe(
-						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700")
-            expect(body.article.comment_count).toBe("11")
-					
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+					);
+					expect(body.article.comment_count).toBe("11");
 				});
 		});
 		test("returns 400 when request has incorrect format", () => {
@@ -199,67 +199,132 @@ describe("/api/articles", () => {
 					});
 				});
 		});
-    test("Responds with 400 and bad request for invalid order value", () => {
-      return request(app)
-        .get("/api/articles?order=helloworld")
-        .expect(400)
-        .then((response) => {
-          expect(response.body.msg).toBe("bad request");
-        });
-    });
-    test("Responds with 400 and bad request for invalid sort_by value", () => {
-      return request(app)
-        .get("/api/articles?sort_by=helloworld")
-        .expect(400)
-        .then((response) => {
-          expect(response.body.msg).toBe("bad request");
-        });
-    });
-    test("Responds with 400 and bad request when invalid sort_by value and valid order", () => {
-      return request(app)
-        .get("/api/articles?sort_by=helloworld&order=asc")
-        .expect(400)
-        .then((response) => {
-          expect(response.body.msg).toBe("bad request");
-        });
-    });
-    test("Responds with 400 and bad request when invalid order value and valid sort_by", () => {
-      return request(app)
-        .get("/api/articles?sort_by=author&order=hello")
-        .expect(400)
-        .then((response) => {
-          expect(response.body.msg).toBe("bad request");
-        });
-    });
+		test("Responds with 400 and bad request for invalid order value", () => {
+			return request(app)
+				.get("/api/articles?order=helloworld")
+				.expect(400)
+				.then((response) => {
+					expect(response.body.msg).toBe("bad request");
+				});
+		});
+		test("Responds with 400 and bad request for invalid sort_by value", () => {
+			return request(app)
+				.get("/api/articles?sort_by=helloworld")
+				.expect(400)
+				.then((response) => {
+					expect(response.body.msg).toBe("bad request");
+				});
+		});
+		test("Responds with 400 and bad request when invalid sort_by value and valid order", () => {
+			return request(app)
+				.get("/api/articles?sort_by=helloworld&order=asc")
+				.expect(400)
+				.then((response) => {
+					expect(response.body.msg).toBe("bad request");
+				});
+		});
+		test("Responds with 400 and bad request when invalid order value and valid sort_by", () => {
+			return request(app)
+				.get("/api/articles?sort_by=author&order=hello")
+				.expect(400)
+				.then((response) => {
+					expect(response.body.msg).toBe("bad request");
+				});
+		});
 	});
-  describe("FILTER QUERIES", () => {
-    test("returns 200 and articles filtered by topic", () => {
-      return request(app)
-      .get("/api/articles?topic=mitch")
-      .expect(200)
-      .then(({body}) => {
-        body.articles.forEach((article) => {
-          expect(article.topic).toBe("mitch")
-        })
-      })
-    })
-    test("404 topic not found if topic does not exist", () => {
-      return request(app)
-      .get("/api/articles?topic=rio")
-      .expect(404)
-      .then(({body}) => {
-        expect(body.msg).toBe("topic not found")
-      })
-    })
-    test("200 empty array if topic exists but no articles", () => {
-      return request(app)
-      .get("/api/articles?topic=paper")
-      .expect(200)
-      .then(({body}) => {
-        expect(body.articles.length).toBe(0)
-      })
-    })
-  })
+	describe("FILTER QUERIES", () => {
+		test("returns 200 and articles filtered by topic", () => {
+			return request(app)
+				.get("/api/articles?topic=mitch")
+				.expect(200)
+				.then(({ body }) => {
+					body.articles.forEach((article) => {
+						expect(article.topic).toBe("mitch");
+					});
+				});
+		});
+		test("401 topic invalid if topic does not exist", () => {
+			return request(app)
+				.get("/api/articles?topic=rio")
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("invalid topic");
+				});
+		});
+		test("200 empty array if topic exists but no articles", () => {
+			return request(app)
+				.get("/api/articles?topic=paper")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.articles.length).toBe(0);
+				});
+		});
+	});
+	describe("POST", () => {
+		test("201 and posts new article", () => {
+			const article = {
+				author: "lurker",
+				title: "New article",
+				body: "this is the body",
+				topic: "mitch",
+			};
+			return request(app)
+				.post("/api/articles")
+				.send(article)
+				.expect(201)
+				.then(({ body }) => {
+					expect(body.article.author).toBe("lurker");
+					expect(body.article.title).toBe("New article");
+					expect(body.article.topic).toBe("mitch");
+					expect(body.article.article_id).toBe(14);
+					expect(body.article.votes).toBe(0);
+					expect(typeof body.article.created_at).toBe("string");
+					expect(body.article.comment_count).toBe("0");
+				});
+		});
+		test("responds 401 missing element", () => {
+			const article = {
+				nope: "wrong",
+			};
+			return request(app)
+				.post("/api/articles")
+				.send(article)
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("missing one or more elements");
+				});
+		});
+		test("responds 401 username invalid", () => {
+			const article = {
+				author: "rio",
+				title: "New article",
+				body: "this is the body",
+				topic: "mitch",
+			};
+			return request(app)
+				.post("/api/articles")
+				.send(article)
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("invalid user");
+				});
+		});
+		test("responds 401 topic invalid", () => {
+			const article = {
+				author: "lurker",
+				title: "New article",
+				body: "this is the body",
+				topic: "rio",
+			};
+			return request(app)
+				.post("/api/articles")
+				.send(article)
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("invalid topic");
+				});
+		});
+	});
 });
 
 describe("/api/articles/:article_id/comments", () => {
@@ -398,50 +463,50 @@ describe("/api/comments/:comment_id", () => {
 	describe("PATCH", () => {
 		test("200 returns comment with updated votes ", () => {
 			return request(app)
-			.patch("/api/comments/1")
-			.send({inc_votes: 1})
-			.expect(200)
-			.then(({body}) => {
-				expect(body.comment.votes).toBe(17)
-			})
-		})
+				.patch("/api/comments/1")
+				.send({ inc_votes: 1 })
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.comment.votes).toBe(17);
+				});
+		});
 		test("404 when valid but non existant comment id passed", () => {
 			return request(app)
-			.patch("/api/comments/300000")
-			.send({inc_votes: 1})
-			.expect(404)
-			.then(({body}) => {
-				expect(body.msg).toBe("comment does not exist")
-			})
-		})
+				.patch("/api/comments/300000")
+				.send({ inc_votes: 1 })
+				.expect(404)
+				.then(({ body }) => {
+					expect(body.msg).toBe("comment does not exist");
+				});
+		});
 		test("returns 400 when invalid id requested", () => {
 			return request(app)
-			.patch("/api/comments/hello")
-			.send({inc_votes: 1})
-			.expect(400)
-			.then(({body}) => {
-				expect(body.msg).toBe("Bad request")
-			})
-		})
+				.patch("/api/comments/hello")
+				.send({ inc_votes: 1 })
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+		});
 		test("returns 400 when wrong data type sent", () => {
 			return request(app)
-			.patch("/api/comments/1")
-			.send({inc_votes: "hello"})
-			.expect(400)
-			.then(({body}) => {
-				expect(body.msg).toBe("Bad request")
-			})
-		})
+				.patch("/api/comments/1")
+				.send({ inc_votes: "hello" })
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+		});
 		test("returns 401 when wrong data key sent", () => {
 			return request(app)
-			.patch("/api/comments/1")
-			.send({nope: "no"})
-			.expect(401)
-			.then(({body}) => {
-				expect(body.msg).toBe("no votes to patch")
-			})
-		})
-	})
+				.patch("/api/comments/1")
+				.send({ nope: "no" })
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("no votes to patch");
+				});
+		});
+	});
 });
 
 describe("/api/users", () => {
@@ -465,21 +530,23 @@ describe("/api/users/:usermame", () => {
 	describe("GET", () => {
 		test("200 and correct user", () => {
 			return request(app)
-			.get("/api/users/lurker")
-			.expect(200)
-			.then(({body}) => {
-				expect(body.user.username).toBe("lurker")
-				expect(body.user.name).toBe("do_nothing")
-				expect(body.user.avatar_url).toBe("https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png")
-			})
-		})
+				.get("/api/users/lurker")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.user.username).toBe("lurker");
+					expect(body.user.name).toBe("do_nothing");
+					expect(body.user.avatar_url).toBe(
+						"https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
+					);
+				});
+		});
 		test("401 invalid user", () => {
 			return request(app)
-			.get("/api/users/rio")
-			.expect(401)
-			.then(({body}) => {
-				expect(body.msg).toBe("invalid user")
-			})
-		})
-	})
-})
+				.get("/api/users/rio")
+				.expect(401)
+				.then(({ body }) => {
+					expect(body.msg).toBe("invalid user");
+				});
+		});
+	});
+});
