@@ -402,7 +402,6 @@ describe("/api/comments/:comment_id", () => {
 			.send({inc_votes: 1})
 			.expect(200)
 			.then(({body}) => {
-				console.log(body)
 				expect(body.comment.votes).toBe(17)
 			})
 		})
