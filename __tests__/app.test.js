@@ -395,6 +395,54 @@ describe("/api/comments/:comment_id", () => {
 				});
 		});
 	});
+	describe("PATCH", () => {
+		test("200 returns comment with updated votes ", () => {
+			return request(app)
+			.patch("/api/comments/1")
+			.send({inc_votes: 1})
+			.expect(200)
+			.then(({body}) => {
+				console.log(body)
+				expect(body.comment.votes).toBe(17)
+			})
+		})
+		test("404 when valid but non existant comment id passed", () => {
+			return request(app)
+			.patch("/api/comments/300000")
+			.send({inc_votes: 1})
+			.expect(404)
+			.then(({body}) => {
+				expect(body.msg).toBe("comment does not exist")
+			})
+		})
+		test("returns 400 when invalid id requested", () => {
+			return request(app)
+			.patch("/api/comments/hello")
+			.send({inc_votes: 1})
+			.expect(400)
+			.then(({body}) => {
+				expect(body.msg).toBe("Bad request")
+			})
+		})
+		test("returns 400 when wrong data type sent", () => {
+			return request(app)
+			.patch("/api/comments/1")
+			.send({inc_votes: "hello"})
+			.expect(400)
+			.then(({body}) => {
+				expect(body.msg).toBe("Bad request")
+			})
+		})
+		test("returns 401 when wrong data key sent", () => {
+			return request(app)
+			.patch("/api/comments/1")
+			.send({nope: "no"})
+			.expect(401)
+			.then(({body}) => {
+				expect(body.msg).toBe("no votes to patch")
+			})
+		})
+	})
 });
 
 describe("/api/users", () => {

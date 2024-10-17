@@ -73,5 +73,23 @@ function selectCommentByCommentId(comment_id) {
 	});
 }
 
+function editCommentByCommentId(comment_id, body){
+	if (!body.inc_votes) {
+		return Promise.reject({
+			status: 401,
+			msg: "no votes to patch",
+		});
+	}
 
-module.exports = { selectCommentsById, insertCommentById, removeCommentById,  };
+	return selectCommentByCommentId(comment_id)
+	.then((comment) => {
+
+		return db.query(`UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *;`, [body.inc_votes, comment_id])
+	})
+	.then((result) => {
+		return result.rows[0]
+	})
+}
+
+
+module.exports = { selectCommentsById, insertCommentById, removeCommentById,editCommentByCommentId };
