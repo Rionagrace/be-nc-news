@@ -7,7 +7,8 @@ const {
 
 function getCommentsById(req, res, next) {
 	const { article_id } = req.params;
-	return selectCommentsById(article_id)
+	const {limit, p } = req.query;
+	return selectCommentsById(article_id, limit, p)
 		.then((comments) => {
 			res.status(200).send({ comments });
 		})

@@ -11,6 +11,7 @@ afterAll(() => {
 });
 
 describe("/api/topics", () => {
+	describe("GET", () => {
 	test("GET 200 responds with all topics", () => {
 		return request(app)
 			.get("/api/topics")
@@ -24,6 +25,36 @@ describe("/api/topics", () => {
 				});
 			});
 	});
+	describe("POST", () => {
+		test("201 and adds a new topic", () => {
+			const topic = {
+				"slug": "topic name here",
+				"description": "description here"
+			}
+			return request(app)
+			.post("/api/topics")
+			.send(topic)
+			.expect(201)
+			.then(({body}) => {
+				expect(body.topic.slug).toBe("topic name here");
+				expect(body.topic.description).toBe("description here")
+			});
+		})
+		test("responds 401 missing element", () => {
+			const topic = {
+				"wrong": "topic name here",
+				"wrong": "description here"
+			}
+			return request(app)
+			.post("/api/topics")
+			.send(topic)
+			.expect(401)
+			.then(({body}) => {
+				expect(body.msg).toBe("missing topic or description");
+			});
+		})
+	})
+})
 });
 
 describe("/api", () => {
@@ -394,7 +425,7 @@ describe("/api/articles/:article_id/comments", () => {
 				.get("/api/articles/1/comments")
 				.expect(200)
 				.then(({ body }) => {
-					expect(body.comments.length).toBe(11);
+					expect(body.comments.length).toBe(10);
 					expect(body.comments).toBeSortedBy("created_at", {
 						descending: true,
 					});
@@ -424,6 +455,46 @@ describe("/api/articles/:article_id/comments", () => {
 					expect(body.msg).toBe("Author id does not exist");
 				});
 		});
+		test("200 and correct number of comments with limit query", () => {
+			return request(app)
+				.get("/api/articles/1/comments?limit=1")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.comments.length).toBe(1);
+				});
+		})
+		test("200 and correct offset of comments with p query", () => {
+			return request(app)
+				.get("/api/articles/1/comments?p=2")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.comments[0].comment_id).toBe(9)
+				});
+		})
+		test("you can stack limit and p queries", () => {
+			return request(app)
+				.get("/api/articles/1/comments?limit=1&p=2")
+				.expect(200)
+				.then(({ body }) => {
+					expect(body.comments[0].comment_id).toBe(2)
+				});
+		})
+		test("400 invalid limit, if limit non numeric", () => {
+			return request(app)
+				.get("/api/articles/1/comments?limit=hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Invalid limit or page query")
+				});
+		})
+		test("400 invalid limit, if p non numeric", () => {
+			return request(app)
+				.get("/api/articles/1/comments?p=hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Invalid limit or page query")
+				});
+		})
 	});
 	describe("POST", () => {
 		test("responds 201 and posts new comment", () => {

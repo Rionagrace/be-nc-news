@@ -4,14 +4,32 @@ const { selectArticleById } = require("./articles.models.js");
 const { articleData } = require("../../db/data/test-data/index.js");
 const { selectUsers } = require("./users.models.js");
 
-function selectCommentsById(article_id) {
-	const sql = `
+function selectCommentsById(article_id, limit = 10, p = 1) {
+
+	if(isNaN(article_id)){
+		return Promise.reject({
+			status: 400,
+			msg: "Bad request"
+		})
+	}
+
+	if (isNaN(limit) || isNaN(p) || limit <= 0 || p <= 0) {
+		return Promise.reject({
+			status: 400,
+			msg: "Invalid limit or page query",
+		});
+	}
+
+	const offset = (p - 1) * limit;
+	const sql = format(`
   SELECT * 
   FROM comments 
-  WHERE article_id = $1 
-  ORDER BY comments.created_at DESC;`;
+  WHERE article_id = %s 
+  ORDER BY comments.created_at DESC
+	LIMIT %s OFFSET %s`, article_id, limit, offset);
 
-	return db.query(sql, [article_id]).then((result) => {
+
+	return db.query(sql).then((result) => {
 		if (!result.rows.length) {
 			return Promise.reject({
 				status: 404,

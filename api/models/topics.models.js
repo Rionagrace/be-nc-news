@@ -23,7 +23,21 @@ function checkTopicExists(topic) {
 	});
 }
 
+function insertTopic(body){
+
+	if(!body.slug || !body.description){
+		return Promise.reject({
+			status: 401,
+			msg: "missing topic or description"
+		})
+	}
+	
+	return db.query(`INSERT INTO topics (slug, description) VALUES ($1, $2) RETURNING *`, [body.slug, body.description])
+	.then((result) => {
+		return result.rows[0]
+	})
+}
 module.exports = {
 	selectTopics,
-	checkTopicExists,
+	checkTopicExists, insertTopic
 };
