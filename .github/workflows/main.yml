@@ -30,7 +30,7 @@ jobs:
       - name: Clone and checkout the repo
         uses: actions/checkout@v4
       - name: setup postgresql
-        uses: harmon758/postgresql-action@v1.0.0
+        uses: harmon758/postgresql-action@v1
         with:
           postgresql db: nc_news_test
           postgresql password: p4sswOrd
@@ -38,4 +38,4 @@ jobs:
       - name: install dependencies
         run: npm install
       - name: run integration tests
-        run: DATABASE=nc_news_test PGPASSWORD=p4sswOrd PGUSER=userface npm run test-app
+        run: PGDATABASE=nc_news_test PGPASSWORD=p4sswOrd PGUSER=userface npm run test-app
