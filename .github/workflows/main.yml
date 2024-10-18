@@ -1,5 +1,8 @@
-name: run tests 
+name: Test & Deploy
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -9,6 +12,7 @@ jobs:
     steps:
       - name: say hello
         run: echo 'hello from pipeline'
+        
   test-utils:
     runs-on: ubuntu-latest 
     steps:
@@ -17,21 +21,21 @@ jobs:
       - name: install dependencies
         run: npm install
       - name: run utils tests
-        run: pm run test-utils
+        run: npm run test-utils
+
   test-app: 
     needs: test-utils 
     runs-on: ubuntu-latest
     steps:
-    - name: Clone and checkout the repo
-      uses:  actions/checkout@v4
-    - name: setup postgresql
-      uses: harmon758/nctarecal-actinn@v1.0.0
-      with:
-        postgresql db: my_db
-        postgresql password: p4sswOrd
-        postgresql user: userface
-
-    - name: install dependencies
-      run: npm install
-    - name: run integration tests
-      run: PDATABASE=my_db PGPASSWORD=p4ssw0rd PGUSER=userface pm run test-app
+      - name: Clone and checkout the repo
+        uses: actions/checkout@v4
+      - name: setup postgresql
+        uses: harmon758/nctarecal-actinn@v1.0.0
+        with:
+          postgresql db: my_db
+          postgresql password: p4sswOrd
+          postgresql user: userface
+      - name: install dependencies
+        run: npm install
+      - name: run integration tests
+        run: DATABASE=my_db PGPASSWORD=p4sswOrd PGUSER=userface npm run test-app
