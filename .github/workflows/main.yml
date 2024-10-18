@@ -32,10 +32,10 @@ jobs:
       - name: setup postgresql
         uses: harmon758/postgresql-action@v1.0.0
         with:
-          postgresql db: my_db
+          postgresql db: nc_news_test
           postgresql password: p4sswOrd
           postgresql user: userface
       - name: install dependencies
         run: npm install
       - name: run integration tests
-        run: DATABASE=my_db PGPASSWORD=p4sswOrd PGUSER=userface npm run test-app
+        run: DATABASE=nc_news_test PGPASSWORD=p4sswOrd PGUSER=userface npm run test-app
