@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "start": "node listen.js",
     "seed-prod": "NODE_ENV=production npm run seed",
-    "test-utils": "npm t utils.test.js"
+    "test-utils": "npm test utils.test.js"
   },
   "repository": {
     "type": "git",
