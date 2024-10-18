@@ -79,9 +79,25 @@
       "created_at": "2024-10-15T08:09:05.386Z"
     }
 	},
-	"DLEETE /api/comments/:comment_id": {
+	"DELETE /api/comments/:comment_id": {
 		"description": "deletes specified comment",
 		"queries": [],
 		"exampleResponse": {}
+	},
+	"GET /api/users": {
+		"description": "serves all users",
+		"queries": [],
+		"exampleResponse": [
+			{
+				"username": "tickle122",
+				"name": "Tom Tickle",
+				"avatar_url": "https://vignette.wikia.nocookie.net/mrmen/images/d/d6/Mr-Tickle-9a.png/revision/latest?cb=20180127221953"
+				},
+				{
+				"username": "grumpy19",
+				"name": "Paul Grump",
+				"avatar_url": "https://vignette.wikia.nocookie.net/mrmen/images/7/78/Mr-Grumpy-3A.PNG/revision/latest?cb=20170707233013"
+				}
+		]
 	}
 }
