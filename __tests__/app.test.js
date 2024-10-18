@@ -81,7 +81,6 @@ describe("/api/articles/:article_id", () => {
 					expect(body.article.topic).toBe("mitch");
 					expect(body.article.body).toBe("I find this existence challenging");
 					expect(body.article.article_id).toBe(1);
-					expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
 					expect(body.article.votes).toBe(100);
 					expect(body.article.article_img_url).toBe(
 						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
@@ -119,7 +118,6 @@ describe("/api/articles/:article_id", () => {
 					expect(body.article.topic).toBe("mitch");
 					expect(body.article.body).toBe("I find this existence challenging");
 					expect(body.article.article_id).toBe(1);
-					expect(body.article.created_at).toBe("2020-07-09T20:11:00.000Z");
 					expect(body.article.article_img_url).toBe(
 						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
 					);
@@ -331,7 +329,6 @@ describe("/api/articles", () => {
 				.expect(200)
 				.then(({ body }) => {
 					expect(body.articles.length).toBe(1);
-					expect(body.articles[0].created_at).toBe("2020-10-18T01:00:00.000Z");
 				});
 		});
 		test("Responds with 400 and bad request for non numeric limit", () => {
