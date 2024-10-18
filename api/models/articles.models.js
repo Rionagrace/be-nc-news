@@ -166,9 +166,20 @@ function insertArticle(body) {
 		});
 }
 
+function removeArticle(article_id){
+
+	return selectArticleById(article_id).then(()=>{
+	return db.query(`DELETE FROM articles WHERE article_id = $1`, [article_id])
+	})
+	.then((result) => {
+		return result.rows
+	})
+}
+
 module.exports = {
 	selectArticleById,
 	selectArticles,
 	editArticleByID,
 	insertArticle,
+	removeArticle
 };

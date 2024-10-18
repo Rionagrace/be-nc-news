@@ -161,6 +161,29 @@ describe("/api/articles/:article_id", () => {
 				});
 		});
 	});
+	describe("DELETE", () => {
+		test("204 and deletes article", () => {
+			return request(app)
+			.delete("/api/articles/1")
+			.expect(204)
+		})
+		test("404 article not found for valid but nonexistant id", () => {
+			return request(app)
+			.delete("/api/articles/30000")
+			.expect(404)
+			.then(({body}) => {
+				expect(body.msg).toBe("Article not found")
+			})
+		})
+		test("400 bad request for invalid id", () => {
+			return request(app)
+				.delete("/api/articles/hello")
+				.expect(400)
+				.then(({ body }) => {
+					expect(body.msg).toBe("Bad request");
+				});
+		});
+	})
 });
 
 describe("/api/articles", () => {
