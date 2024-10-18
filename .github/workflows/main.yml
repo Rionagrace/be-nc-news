@@ -30,7 +30,7 @@ jobs:
       - name: Clone and checkout the repo
         uses: actions/checkout@v4
       - name: setup postgresql
-        uses: harmon758/nctarecal-actinn@v1.0.0
+        uses: harmon758/postgresql-action@v1.0.0
         with:
           postgresql db: my_db
           postgresql password: p4sswOrd
