@@ -39,3 +39,14 @@ jobs:
         run: npm install
       - name: run integration tests
         run: PGDATABASE=nc_news_test PGPASSWORD=p4sswOrd PGUSER=userface npm run test-app
+  ci:
+    runs-on: ubuntu-latest
+    needs: test-app
+    steps:
+      - name: Deploy
+        # Only run this step if the branch is main
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
